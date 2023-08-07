@@ -37,5 +37,23 @@ class AuthController extends Controller
             ]);
     }
 
+    public function signup(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required||min:8',
+        ]);
+
+        $user->create([
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'message' =>'User created successfully',
+            'user' => $user
+        ]);
+
+    }
     
 }
