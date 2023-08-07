@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wire', function (Blueprint $table) {
-            $table->id();
+        Schema::create('wires', function (Blueprint $table) {
+            $table->increments('id');
             $table->foreignId('profile_id')->onDelete('cascade');
             $table->integer('amount');
             $table->boolean('withdrawal');

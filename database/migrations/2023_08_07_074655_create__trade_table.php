@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trade', function (Blueprint $table) {
-            $table->id();
+        Schema::create('trades', function (Blueprint $table) {
+            $table->increments('id');
             $table->foreignId('profile_id')->onDelete('cascade');
             $table->text('symbol');
             $table->integer('quantity');
             $table->integer('open_price');
-            $table->integer('close_price');
+            $table->integer('close_price')->nullable();
             $table->date('open_datetime');
-            $table->date('close_datetime');
+            $table->date('close_datetime')->nullable();
             $table->boolean('open')->default(true);
             $table->timestamps();
         });
