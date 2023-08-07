@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wire', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('profile_id');
+            $table->foreignId('profile_id')->onDelete('cascade');
             $table->integer('amount');
             $table->boolean('withdrawal');
             $table->timestamps();

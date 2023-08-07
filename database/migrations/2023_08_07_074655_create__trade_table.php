@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('trade', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('profile_id');
+            $table->foreignId('profile_id')->onDelete('cascade');
             $table->text('symbol');
             $table->integer('quantity');
             $table->integer('open_price');
