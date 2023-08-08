@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('trades', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('profile_id')->onDelete('cascade');
+            $table->integer('profile_id')->unsigned();
+            $table->foreign('profile_id')->references('id')->on('profiles')->onDelete('cascade');
             $table->text('symbol');
             $table->integer('quantity');
             $table->integer('open_price');
             $table->integer('close_price')->nullable();
-            $table->date('open_datetime');
-            $table->date('close_datetime')->nullable();
+            $table->dateTime('open_datetime');
+            $table->dateTime('close_datetime')->nullable();
             $table->boolean('open')->default(true);
             $table->timestamps();
         });
+        
     }
 
     /**
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('_trade');
+        Schema::dropIfExists('trades');
     }
 };

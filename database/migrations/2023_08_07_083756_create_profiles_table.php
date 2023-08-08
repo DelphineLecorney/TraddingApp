@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('profiles', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->text('first_name');
             $table->text('last_name');
-            $table->text('adress');
+            $table->text('address');
             $table->timestamps();   
-            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
