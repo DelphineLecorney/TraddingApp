@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\API\Auth;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -21,7 +22,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $token = Auth::attempt($credentials);
 
-        if(!token) {
+        if(!$token) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 401);
