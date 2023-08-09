@@ -5,6 +5,9 @@ namespace App\Http\Controllers\API\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -42,10 +45,10 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required||min:8',
+            'password' => 'required|min:8',
         ]);
 
-        $user->create([
+        $user = User::create([
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -53,15 +56,6 @@ class AuthController extends Controller
         return response()->json([
             'message' =>'User created successfully',
             'user' => $user
-        ]);
-
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        return response()->json([
-            'message' => 'Successfully logged out',
         ]);
     }
 
