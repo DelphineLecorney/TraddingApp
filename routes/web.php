@@ -16,5 +16,3 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('testViews');
 });
-
-Route::get('/users', 'UserController@index');
