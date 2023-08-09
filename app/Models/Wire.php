@@ -14,4 +14,9 @@ class Wire extends Model
         'amount',
         'withdrawal',
     ];
+
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class);
+    }
 }

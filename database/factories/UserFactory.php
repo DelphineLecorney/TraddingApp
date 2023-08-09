@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\User;
+use App\Models\Profile;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -15,15 +17,44 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+    protected $model = User::class;
+
     public function definition(): array
     {
         return [
-            'email' => fake()->unique()->safeEmail(),
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
         ];
     }
+
+    public function configure()
+{
+    return $this->afterCreating(function (User $user) {
+        $profile = $user->profile;
+
+        $profile->trades()->create([
+            'symbol' => 'TSLA',
+            'quantity' => 123,
+            'open_price' => 103059,
+            'close_price' => null,
+            'open_datetime' => now(),
+            'close_datetime' => null,
+            'open' => true,
+        ]);
+        $profile->trades()->create([
+            'symbol' => 'TSLA',
+            'quantity' => 123,
+            'open_price' => 103059,
+            'close_price' => 119449,
+            'open_datetime' => now(),
+            'close_datetime' => now()->addHours(2),
+            'open' => false,
+        ]);
+    });
+}
 
     /**
      * Indicate that the model's email address should be unverified.

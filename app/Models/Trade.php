@@ -19,4 +19,9 @@ class Trade extends Model
         'close_datetime',
         'open',
     ];
+
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class);
+    }
 }

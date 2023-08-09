@@ -15,4 +15,19 @@ class Profile extends Model
         'last_name',
         'address',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function wires()
+    {
+        return $this->hasMany(Wire::class);
+    }
+
+    public function trades()
+    {
+        return $this->hasMany(Trade::class);
+    }
 }
