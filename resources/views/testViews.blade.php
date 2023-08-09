@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>Test Users</title>
 </head>
 <body>
     <h1>Welcome to the Trading App</h1>
@@ -13,9 +13,9 @@
     </p>
 
     <ul>
-        <li><a href="{{ route('login') }}">Login</a></li>
-        <li><a href="{{ route('signup') }}">Sign Up</a></li>
-        <li><a href="{{ route('logout') }}">Logout</a></li>
+        <p>ID: {{ $user->id }}</p>
+        <p>Email: {{ $user->email }}</p>
+
     </ul>
 
 </body>

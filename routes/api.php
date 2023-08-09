@@ -28,4 +28,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
-Route::get('/users', [UserController::class, 'index']);
+Route::controller(UserController::class)->group(function (){
+    Route::get('/users', 'index');
+    Route::get('/users/{id}', 'show')->name('users.show');
+});
