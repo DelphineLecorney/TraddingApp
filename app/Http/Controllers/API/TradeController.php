@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Controllers\Auth;
+use Illuminate\Htttp\Controllers\Trade;
 
 class TradeController extends Controller
 {
@@ -13,29 +15,41 @@ class TradeController extends Controller
             'symbol' => 'required|string',
             'quantity' => 'required|integer|min:1',
         ]);
-    
-    $currentPrice = fetchPriceFromAPi($request->symbol);
-    $totalCost = $currentPrice * $reqeuest->quantity;
-    $user = Auth::user();
-    if($user->balance < $totalCost){
-        return response()->json(['message' => 'Not enough for buying']);
+
+        $currentPrice = fetchPriceFromAPi($request->symbol);
+        $totalCost = $currentPrice * $reqeuest->quantity;
+        $user = Auth::user();
+        if($user->balance < $totalCost) {
+            return response()->json(['message' => 'Not enough for buying']);
+        }
+
+        $trade = Trade::create([
+            'symbol' => $request->symbol,
+            'quantity' => $request->quantity,
+            'open_price' => $currentPrice,
+            'open_datetime' => now(),
+            'open' => true,
+        ]);
+
+        $user->balance -= $totalCost;
+        $user->save();
+
+        return response()->json(['message' => "It's open successfully"]);
     }
 
-    $trade = Trade::create([
-        'symbol' => $request->symbol,
-        'quantity' => $request->quantity,
-        'open_price' => $currentPrice,
-        'open_datetime' => now(),
-        'open' => true,
-    ]);
+    public function indexOpenTrades()
+    {
+        $user = Auth::user();
+        $openTrades = Trade::where('profile_id', $user->profile->id)
+                            ->where('open', true)
+                            ->get();
 
-    $user->balance -= $totalCost;
-    $user->save();
-
-    return response()->json(['message' => "It's open successfully"]);
+        return response()->json([
+            'open_trades' =>$openTrades,
+        ]);
     }
-    
-    function closeTrade(Request $request)
+
+    public function closeTrade(Request $request)
     {
         $request->validate([
             'profile_id' => 'required|exists:profiles, id',
@@ -49,7 +63,7 @@ class TradeController extends Controller
         $currentPrice = fetchPriceFromPrice($trade->symbol);
 
         $totalTrades = $currentPrice * $trade->quantity;
-        
+
         $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
         $trade->close_price = $currentPrice;
@@ -64,6 +78,18 @@ class TradeController extends Controller
         return response()->json([
             'message' => 'Trade close successfully',
             'Résultat de la transaction' => $res,
+        ]);
+    }
+
+    public function indexCloseTrades()
+    {
+        $user = Auth::user();
+        $closedTrades = Trade::where('profile_id', $user->profile->id)
+                              ->where('open', false)
+                              ->get();
+        
+        return response()->json([
+            'closed_trades' => $closedTrades,
         ]);
     }
 

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\UserController;
-
+use App\Http\Controllers\API\TradeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,3 +32,9 @@ Route::prefix('users')->group(function () {
     Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
 });
 
+Route::prefix('trades')->group(function () {
+    Route::post('/openTrade', [TradeController::class, 'openTrade']);
+    Route::post('/closeTrade', [TradeCOntroller::class, 'closeTrade']);
+    Route::post('/trades/index/open', [TradeCOntroller::class, 'indexOpenTrades']);
+    Route::post('/trades/index/closed', [TradeCOntroller::class, 'indexCloseTrades']);
+});
