@@ -35,6 +35,37 @@ class TradeController extends Controller
     return response()->json(['message' => "It's open successfully"]);
     }
     
+    function closeTrade(Request $request)
+    {
+        $request->validate([
+            'profile_id' => 'required|exists:profiles, id',
+        ]);
+
+        $trade = Trade::where('profile_id', $request->profile_id)
+                        ->where('open', true)
+                        ->firstOrFail();
+
+
+        $currentPrice = fetchPriceFromPrice($trade->symbol);
+
+        $totalTrades = $currentPrice * $trade->quantity;
+        
+        $res = ($currentPrice - $trade->open_price) * $trade->quantity;
+
+        $trade->close_price = $currentPrice;
+        $trade->close_datetime = now();
+        $trade->open = false;
+        $trade->save();
+
+        $user = Auth::user();
+        $user->balance += $res;
+        $user-> save();
+
+        return response()->json([
+            'message' => 'Trade close successfully',
+            'Résultat de la transaction' => $res,
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
