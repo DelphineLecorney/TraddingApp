@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Profile;
+use App\Models\Trade;
+use App\Models\Wire;
 
 class AuthController extends Controller
 {
@@ -46,6 +49,9 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|min:8',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'address' => 'required|string',
         ]);
 
         $user = User::create([
@@ -53,9 +59,31 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+
+        $profile = Profile::create([
+            'user_id' => $user->id,
+            'first_name' => $request->firstname,
+            'last_name' => $request->lastname,
+            'address' => $request->address,
+        ]);
+
+        $trade = Trade::create([
+            'user_id' => $user->id,
+        ]);
+
+        $wire = Wire::create([
+            'user_id' => $user->id,
+            'amount' => $request->amount,
+            'withdrawal' => $request->withdrawal,
+
+        ]);
+
         return response()->json([
-            'message' =>'User created successfully',
-            'user' => $user
+            'message' => 'User created successfully',
+            'user' => $user,
+            'profile' => $profile,
+            'trade' => $trade,
+            'wire' => $wire,
         ]);
     }
 

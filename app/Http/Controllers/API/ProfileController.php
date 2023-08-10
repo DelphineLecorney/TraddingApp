@@ -2,24 +2,35 @@
 
 namespace App\Http\Controllers\API;
 
+use Illuminate\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Profile;
 
 class ProfileController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function createProfile(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:user,id',
+            'first_name'=> 'required|string',
+            'last_name' => 'required|string',
+            'address' => 'required|string',
+        ]);
+
+        $profile = Profile::create([
+           'user_id' => $request->user_id,
+           'first_name' => $request->first_name,
+           'last_name' => $request->last_name,
+           'address' => $request->address, 
+        ]);
+
+        return response()->json ([
+            'message' => 'Your profile is created successfully',
+            'profile' => $profile,
+        ]);
     }
 
     /**
