@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Controllers\Auth;
-use Illuminate\Htttp\Controllers\Trade;
+use App\Models\Trade;
 
 class TradeController extends Controller
 {
@@ -17,24 +17,26 @@ class TradeController extends Controller
         ]);
 
         $currentPrice = fetchPriceFromAPi($request->symbol);
-        $totalCost = $currentPrice * $reqeuest->quantity;
+        $totalCost = $currentPrice * $request->quantity;
         $user = Auth::user();
         if($user->balance < $totalCost) {
-            return response()->json(['message' => 'Not enough for buying']);
+            return response()->json(['message' => 'Not enough money for buying']);
         }
 
-        $trade = Trade::create([
-            'symbol' => $request->symbol,
-            'quantity' => $request->quantity,
-            'open_price' => $currentPrice,
+        $openTrade = Trade::create([
+            'profile_id' => $profile->id,
+            'symbol' => 'TSLA',
+            'quantity' => 103059,
+            'open_price' => null,
             'open_datetime' => now(),
+            'close_datetime' =>null,
             'open' => true,
         ]);
 
         $user->balance -= $totalCost;
         $user->save();
 
-        return response()->json(['message' => "It's open successfully"]);
+        return response()->json(['message' => "The trade is open successfully"]);
     }
 
     public function indexOpenTrades()
@@ -52,7 +54,7 @@ class TradeController extends Controller
     public function closeTrade(Request $request)
     {
         $request->validate([
-            'profile_id' => 'required|exists:profiles, id',
+            'profile_id' => 'required|exists:profiles,id',
         ]);
 
         $trade = Trade::where('profile_id', $request->profile_id)
@@ -74,6 +76,17 @@ class TradeController extends Controller
         $user = Auth::user();
         $user->balance += $res;
         $user-> save();
+        
+        $closeTrade = Trade::create([
+            'profile_id' => $profile->id,
+            'symbol' => 'TSLA',
+            'quantity' => 123,
+            'open_price' => 103059,
+            'close_price' => 119449,
+            'open_datetime' => now(),
+            'close_datetime' =>now()->addMonth(1),
+            'open' => false,
+        ]);
 
         return response()->json([
             'message' => 'Trade close successfully',
