@@ -15,8 +15,8 @@ return new class extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->text('first_name')->nullable();
-            $table->text('last_name')->nullable();
+            $table->text('first_name');
+            $table->text('last_name');
             $table->text('address');
             $table->timestamps();   
         });
