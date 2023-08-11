@@ -46,6 +46,8 @@ class AuthController extends Controller
 
     public function signup(Request $request)
     {
+        \Log::info('Received signup request: ' . json_encode($request->all()));
+
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|min:8',
@@ -59,7 +61,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-
         $profile = Profile::create([
             'user_id' => $user->id,
             'first_name' => $request->first_name,
@@ -67,25 +68,36 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        $trade = Trade::create([
-            'user_id' => $user->id,
+        $openTrade = Trade::create([
+            'profile_id' => $profile->id,
+            'symbol' => 'TSLA',
+            'quantity' => 123,
+            'open_price' => 103059,
+            'close_price' => null,
+            'open_datetime' => now(),
+            'close_datetime' => null,
+            'open' => true,
         ]);
 
-        $wire = Wire::create([
-            'user_id' => $user->id,
-            'amount' => $request->amount,
-            'withdrawal' => $request->withdrawal,
-
+        $closeTrade = Trade::create([
+            'profile_id' => $profile->id,
+            'symbol' => 'TSLA',
+            'quantity' => 123,
+            'open_price' => 103059,
+            'close_price' => 119449,
+            'open_datetime' => $openTrade->open_datetime,
+            'close_datetime' => now()->addMonth(1),
+            'open' => false,
         ]);
+            
 
         return response()->json([
             'message' => 'User created successfully',
             'user' => $user,
             'profile' => $profile,
-            'trade' => $trade,
-            'wire' => $wire,
         ]);
     }
+
 
     public function refresh()
     {

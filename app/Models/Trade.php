@@ -10,7 +10,7 @@ class Trade extends Model
     use HasFactory;
 
     protected $fillable = [
-        'porfile_id',
+        'profile_id',
         'symbol',
         'quantity',
         'open_price',
