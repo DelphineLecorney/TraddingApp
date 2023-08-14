@@ -2,10 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\TradeController;
 use App\Http\Controllers\API\WireController;
+use App\Http\Controllers\API\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +26,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('signup', [AuthController::class, 'signup'])->name('auth.signup');
-    Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
 });
 
@@ -41,6 +42,10 @@ Route::prefix('trades')->group(function () {
 });
 
 Route::prefix('wires')->group(function() {
-    Route::post('/createWire', [WireController::class, 'createWire']);
+    Route::post('createWire', [WireController::class, 'createWire'])->name('wire.createWire');
 });
 
+Route::prefix('profiles')->group(function() {
+    Route::get('/', [ProfileController::class, 'index']);
+    Route::put('/profile/{id}', [ProfileController::class, 'update']);
+});

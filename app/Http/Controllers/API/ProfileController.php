@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Profile;
 
 class ProfileController extends Controller
@@ -31,6 +31,20 @@ class ProfileController extends Controller
             'message' => 'Your profile is created successfully',
             'profile' => $profile,
         ]);
+    }
+
+    public function index()
+    {
+        $profiles = Profile::all();
+        $response = [
+            'success' => true,
+            'message' => 'List of profiles retrieved successfully',
+            'data' => $profiles,
+        ];
+
+        return response()->json([
+            'profiles' => $profiles
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
@@ -62,7 +76,30 @@ class ProfileController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $profile = Profile::find($id);
+
+        if(!$profile){
+            return response()-json([
+                'status' => 404,
+                'message' => 'Profile not found',
+                'data' => null
+            ], 404, [], JSON_PRETTY_PRINT);
+        }
+
+        $updatedData = $request->validate([
+            'first_name'=> 'required|string',
+            'last_name' => 'required|string',
+            'address' => 'required|string',
+        ]);
+
+        $profile->update($updatedData);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'The profile was successfully updated',
+            'data' => $profile
+        ], 200, [], JSON_PRETTY_PRINT);
+        
     }
 
     /**
