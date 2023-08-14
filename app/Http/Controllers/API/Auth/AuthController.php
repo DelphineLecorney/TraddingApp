@@ -46,7 +46,7 @@ class AuthController extends Controller
 
     public function signup(Request $request)
     {
-        \Log::info('Received signup request: ' . json_encode($request->all()));
+        // \Log::info('Received signup request: ' . json_encode($request->all()));
 
         $request->validate([
             'email' => 'required|string|email|max:255|unique:users',
@@ -67,6 +67,8 @@ class AuthController extends Controller
             'last_name' => $request->last_name,
             'address' => $request->address,
         ]);
+
+        $token = $user->createToken('api_token')->plainTextToken;
 
         $openTrade = Trade::create([
             'profile_id' => $profile->id,
@@ -95,7 +97,8 @@ class AuthController extends Controller
             'message' => 'User created successfully',
             'user' => $user,
             'profile' => $profile,
-        ]);
+            'token' => $token,
+        ], 201);
     }
 
 

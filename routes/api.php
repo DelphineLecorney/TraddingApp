@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\TradeController;
+use App\Http\Controllers\API\WireController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,3 +39,8 @@ Route::prefix('trades')->group(function () {
     Route::get('/index/open', [TradeController::class, 'indexOpenTrades']);
     Route::get('/index/closed', [TradeController::class, 'indexCloseTrades']);
 });
+
+Route::prefix('wires')->group(function() {
+    Route::post('/createWire', [WireController::class, 'createWire']);
+});
+
