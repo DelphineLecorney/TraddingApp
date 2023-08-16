@@ -24,14 +24,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
-    Route::post('signup', [AuthController::class, 'signup'])->name('auth.signup');
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('signup', [AuthController::class, 'signup']);
     Route::post('refresh', [AuthController::class, 'refresh']);
 });
 
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
-    Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/{id}', [UserController::class, 'show']);
 });
 
 Route::prefix('trades')->group(function () {
@@ -42,10 +42,13 @@ Route::prefix('trades')->group(function () {
 });
 
 Route::prefix('wires')->group(function() {
-    Route::post('createWire', [WireController::class, 'createWire'])->name('wire.createWire');
+    Route::get('/', [WireController::class, 'index']);
+    Route::post('/{id}', [WireController::class, 'show']);
+    Route::post('createWire', [WireController::class, 'createWire']);
 });
 
 Route::prefix('profiles')->group(function() {
     Route::get('/', [ProfileController::class, 'index']);
-    Route::put('/profile/{id}', [ProfileController::class, 'update']);
+    Route::get('/{id}', [ProfileController::class, 'show']);
+    Route::put('/{id}', [ProfileController::class, 'update']);
 });

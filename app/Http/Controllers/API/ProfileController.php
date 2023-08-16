@@ -11,7 +11,7 @@ class ProfileController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function createProfile(Request $request)
+    public function createProfile(Request $request, string $id)
     {
         $request->validate([
             'user_id' => 'required|exists:user,id',
@@ -24,10 +24,10 @@ class ProfileController extends Controller
            'user_id' => $request->user_id,
            'first_name' => $request->first_name,
            'last_name' => $request->last_name,
-           'address' => $request->address, 
+           'address' => $request->address,
         ]);
 
-        return response()->json ([
+        return response()->json([
             'message' => 'Your profile is created successfully',
             'profile' => $profile,
         ]);
@@ -60,8 +60,23 @@ class ProfileController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $profile = Profile::find($id);
+
+        if (!$profile) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Profile not found',
+                'data' => null
+            ], 404, [], JSON_PRETTY_PRINT);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Profile retrieved successfully',
+            'data' => $profile
+        ], 200, [], JSON_PRETTY_PRINT);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -75,11 +90,12 @@ class ProfileController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
+{
+    try {
         $profile = Profile::find($id);
 
-        if(!$profile){
-            return response()-json([
+        if (!$profile) {
+            return response()->json([
                 'status' => 404,
                 'message' => 'Profile not found',
                 'data' => null
@@ -99,8 +115,15 @@ class ProfileController extends Controller
             'message' => 'The profile was successfully updated',
             'data' => $profile
         ], 200, [], JSON_PRETTY_PRINT);
-        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while updating the profile',
+            'error' => $e->getMessage()
+        ], 500, [], JSON_PRETTY_PRINT);
     }
+}
+
 
     /**
      * Remove the specified resource from storage.
