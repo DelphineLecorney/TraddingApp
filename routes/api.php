@@ -43,9 +43,10 @@ Route::prefix('trades')->group(function () {
 
 Route::prefix('wires')->group(function() {
     Route::get('/', [WireController::class, 'index']);
-    Route::post('/{id}', [WireController::class, 'show']);
+    Route::get('/{id}', [WireController::class, 'show']);
     Route::post('createWire', [WireController::class, 'createWire']);
 });
+
 
 Route::prefix('profiles')->group(function() {
     Route::get('/', [ProfileController::class, 'index']);

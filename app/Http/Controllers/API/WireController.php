@@ -6,41 +6,53 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Wire;
+use App\Models\Profile;
 
 class WireController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
-        //
+        $wires = Wire::all();
+        $response = [
+            'success' => true,
+            'message' => 'List of wires retrieved successfully',
+            'data' => $wires,
+        ];
+        return response()->json($response, 200, [], JSON_PRETTY_PRINT);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function createWire(Request $request)
-{
-    $request->validate([
-        'profile_id' => 'required|integer',
-        'amount' => 'required|integer',
-        'withdrawal' => 'required|boolean',
-    ]);
+    {
 
-    $profileId = $request->profile_id;
+        $request->validate([
+            'profile_id' => 'required|integer',
+            'amount' => 'required|integer',
+            'withdrawal' => 'required|boolean',
+        ]);
 
-    $wire = Wire::create([
-        'profile_id' => $profileId,
-        'amount' => $request->amount,
-        'withdrawal' => $request->withdrawal,
-    ]);
+        $profileId = $request->profile_id;
 
-    return response()->json([
-        'message' => 'Your wire is created successfully',
-        'wire' => $wire,
-    ]);
-}
+        $wire = Wire::create([
+            'profile_id' => $profileId,
+            'amount' => $request->amount,
+            'withdrawal' => $request->withdrawal,
+        ]);
+
+        $message = $request->withdrawal ? 'Your withdrawal is processed successfully' : 'Your deposit is processed successfully';
+
+        return response()->json([
+            'message' => 'Your wire is created successfully',
+            'wire' => $wire,
+        ], 201);
+    }
 
 
     /**
@@ -56,7 +68,21 @@ class WireController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $wire = Wire::find($id);
+
+        if (!$wire) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Wire not found',
+                'data' => null
+            ], 404, [], JSON_PRETTY_PRINT);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Wire retrieved successfully',
+            'data' => $wire
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
