@@ -3,13 +3,33 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
-use Illuminate\Http\Controllers\Auth;
 use App\Models\Trade;
 use App\Models\Profile;
 
 class TradeController extends Controller
 {
+
+    public function fetchPriceFromApi($symbol)
+    {
+        $response = Http::withHeaders([
+            'X-Rapidapi-Key' => '0a5012542cmsha2cbc9ec2f5dc58p10173cjsn113632b4ef8d',
+            'X-Rapidapi-Host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+        ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/auto-complete?q={$symbol}&region=US");
+
+        $data = $response->json();
+
+        if (isset($data['price'])) {
+            return $data['price'];
+        }
+
+        return 0;
+    }
+
+
+
     public function openTrade(Request $request)
     {
         $request->validate([
@@ -17,12 +37,13 @@ class TradeController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        // $currentPrice = fetchPriceFromAPi($request->symbol);
-        // $totalCost = $currentPrice * $request->quantity;
-        // $user = Auth::user();
-        // if($user->balance < $totalCost) {
-        //     return response()->json(['message' => 'Not enough money for buying']);
-        // }
+        $currentPrice = $this->fetchPriceFromAPi($request->symbol);
+
+        $totalCost = $currentPrice * $request->quantity;
+        $user = Auth::user();
+        if($user->balance < $totalCost) {
+            return response()->json(['message' => 'Not enough money for buying']);
+        }
         $user = Auth::user();
         $profile = $user->profile;
 
@@ -36,11 +57,11 @@ class TradeController extends Controller
             'open' => true,
         ]);
 
-    //     $user->balance -= $totalCost;
-    //     $user->save();
+        $user->balance -= $totalCost;
+        $user->save();
 
-    //     return response()->json(['message' => "The trade is open successfully"]);
-    // 
+        return response()->json(['message' => "The trade is open successfully"]);
+    
 }
 
     public function indexOpenTrades()
@@ -65,9 +86,9 @@ class TradeController extends Controller
                         ->where('open', true)
                         ->firstOrFail();
 
-        // $currentPrice = fetchPriceFromPrice($trade->symbol);
+        $currentPrice = fetchPriceFromPrice($trade->symbol);
 
-        // $res = ($currentPrice - $trade->open_price) * $trade->quantity;
+        $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
         $profile = Auth::user()->profile;
         

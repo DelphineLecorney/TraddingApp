@@ -90,39 +90,71 @@ class ProfileController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-{
-    try {
-        $profile = Profile::find($id);
+    {
+        try {
+            $profile = Profile::find($id);
 
-        if (!$profile) {
+            if (!$profile) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Profile not found',
+                    'data' => null
+                ], 404, [], JSON_PRETTY_PRINT);
+            }
+
+            $updatedData = $request->validate([
+                'first_name'=> 'required|string',
+                'last_name' => 'required|string',
+                'address' => 'required|string',
+            ]);
+
+            $profile->update($updatedData);
+
             return response()->json([
-                'status' => 404,
-                'message' => 'Profile not found',
-                'data' => null
-            ], 404, [], JSON_PRETTY_PRINT);
+                'status' => 200,
+                'message' => 'The profile was successfully updated',
+                'data' => $profile
+            ], 200, [], JSON_PRETTY_PRINT);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while updating the profile',
+                'error' => $e->getMessage()
+            ], 500, [], JSON_PRETTY_PRINT);
         }
-
-        $updatedData = $request->validate([
-            'first_name'=> 'required|string',
-            'last_name' => 'required|string',
-            'address' => 'required|string',
-        ]);
-
-        $profile->update($updatedData);
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'The profile was successfully updated',
-            'data' => $profile
-        ], 200, [], JSON_PRETTY_PRINT);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'An error occurred while updating the profile',
-            'error' => $e->getMessage()
-        ], 500, [], JSON_PRETTY_PRINT);
     }
-}
+
+    public function fetchProfileWithBalance()
+    {
+        try {
+            $user = auth()->user();
+
+            $profile = $user->profile;
+
+            if (!$profile) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Profile not found',
+                    'data' => null
+                ], 404, [], JSON_PRETTY_PRINT);
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Profile retrieved successfully',
+                'data' => [
+                    'profile' => $profile,
+                    'balance' => $user->balance,
+                ]
+            ], 200, [], JSON_PRETTY_PRINT);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching the profile data',
+                'error' => $e->getMessage()
+            ], 500, [], JSON_PRETTY_PRINT);
+        }
+    }
 
 
     /**
