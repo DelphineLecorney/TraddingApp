@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -18,17 +19,16 @@ class TradeController extends Controller
         $response = Http::withHeaders([
             'X-Rapidapi-Key' => '0a5012542cmsha2cbc9ec2f5dc58p10173cjsn113632b4ef8d',
             'X-Rapidapi-Host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com'
-        ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/auto-complete?q={$symbol}&region=US");
+        ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols={$symbol}");
 
         $data = $response->json();
 
-        if (isset($data['quoteResponse']['result'][0]['regularMarketPrice']['raw'])) {
-            return $data['quoteResponse']['result'][0]['regularMarketPrice']['raw'];
+        if (isset($data['quoteResponse']['result'][0]['regularMarketPrice'])) {
+            return $data['quoteResponse']['result'][0]['regularMarketPrice'];
         }
 
         return 0;
     }
-
 
     public function openTrade(Request $request)
     {
@@ -39,19 +39,22 @@ class TradeController extends Controller
             ]);
 
             $symbol = $request->input('symbol');
+
             $currentPrice = $this->fetchPriceFromApi($symbol);
+
+            if ($currentPrice === null) {
+                return response()->json(['message' => 'Current price not available'], 400);
+            }
+
             $totalCost = $currentPrice * $request->input('quantity');
 
-            if (!Auth::check()) {
-                return response()->json(['message' => 'Unauthorized'], 401);
-            }
-            if (!Auth::user()->can('openTrade')) {
-                return response()->json(['message' => 'Permission denied'], 403);
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['message' => 'User not authenticated'], 401);
             }
 
-            $user = Auth::user();
             if ($user->balance < $totalCost) {
-                return response()->json(['message' => 'Not enough money for buying']);
+                return response()->json(['message' => 'Not enough money for buying'], 400);
             }
 
             $profile = $user->profile;
@@ -77,6 +80,18 @@ class TradeController extends Controller
             return response()->json(['message' => 'An error occurred'], 500);
         }
     }
+
+    public function indexOpenTrades()
+    {
+        $user = Auth::user();
+        $openTrades = Trade::where('profile_id', $user->profile->id)
+                            ->where('open', true)
+                            ->get();
+
+        return response()->json([
+            'open_trades' => $openTrades,
+        ]);
+    }
     public function closeTrade(Request $request)
     {
         try {
@@ -89,21 +104,23 @@ class TradeController extends Controller
             ->firstOrFail();
 
             $currentPrice = $this->fetchPriceFromApi($trade->symbol);
+            \Log::info('Current price: ' . $currentPrice);
+
 
             $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
             $profile = Auth::user()->profile;
 
             $closeTrade = Trade::create([
-            'profile_id' => $trade->profile_id,
-            'symbol' => $trade->symbol,
-            'quantity' => $trade->quantity,
-            'open_price' => $trade->open_price,
-            'close_price' => 119449,
-            'open_datetime' => $trade->open_datetime,
-            'close_datetime' => now()->addMonth(1),
-            'open' => false,
-        ]);
+                'profile_id' => $trade->profile_id,
+                'symbol' => $trade->symbol,
+                'quantity' => $trade->quantity,
+                'open_price' => $trade->open_price,
+                'close_price' => 119449,
+                'open_datetime' => $trade->open_datetime,
+                'close_datetime' => now()->addMonth(1),
+                'open' => false,
+            ]);
 
             $user = Auth::user();
             $user->balance += $res;
