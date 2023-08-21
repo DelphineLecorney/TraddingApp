@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 
@@ -129,8 +130,10 @@ class ProfileController extends Controller
         try {
             $user = auth()->user();
 
-            $profile = $user->profile;
+            dd(Auth::user());
 
+            $profile = $user->profile;
+            dd($profile);
             if (!$profile) {
                 return response()->json([
                     'status' => 404,
