@@ -37,9 +37,11 @@ class TradeController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $currentPrice = $this->fetchPriceFromAPi($request->symbol);
-
+        $symbol = 'tesla';
+        $currentPrice = $this->fetchPriceFromAPi($symbol); 
         $totalCost = $currentPrice * $request->quantity;
+
+
         $user = Auth::user();
         if($user->balance < $totalCost) {
             return response()->json(['message' => 'Not enough money for buying']);
