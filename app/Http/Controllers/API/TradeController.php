@@ -134,6 +134,20 @@ class TradeController extends Controller
         //
     }
 
+    public function index()
+    {
+        $trades = Trade::all();
+        $response = [
+            'success' => true,
+            'message' => 'List of trades retrieved successfully',
+            'data' => $trades,
+        ];
+
+        return response()->json([
+            'trades' => $trades
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -147,7 +161,7 @@ class TradeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
     }
 
     /**
