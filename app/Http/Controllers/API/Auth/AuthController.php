@@ -101,16 +101,18 @@ class AuthController extends Controller
         ], 201);
     }
 
-
     public function refresh()
-    {
-        return response()->json([
-            'user' => Auth::user(),
-            'authorization' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-            ]);
-    }
+{
+    $token = Auth::user()->createToken('api_token')->plainTextToken;
+    
+    return response()->json([
+        'user' => Auth::user(),
+        'authorization' => [
+            'token' => $token,
+            'type' => 'bearer',
+        ]
+    ]);
+}
+
 
 }
