@@ -26,11 +26,10 @@ class TradeController extends Controller
         ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols={$symbol}");
 
         $data = $response->json();
-
+        var_dump($data);
         if (isset($data['quoteResponse']['result'][0]['regularMarketPrice'])) {
             return $data['quoteResponse']['result'][0]['regularMarketPrice'];
         }
-
         return 0;
     }
 
@@ -64,7 +63,7 @@ class TradeController extends Controller
             $profile = $user->profile;
 
             $openTrade = Trade::create([
-                'profile_id' => $profile,
+                'profile_id' => $profile->id,
                 'symbol' => $request->symbol,
                 'quantity' => $request->quantity,
                 'open_price' => null,
@@ -76,7 +75,10 @@ class TradeController extends Controller
             $user->balance -= $totalCost;
             $user->save();
 
-            return response()->json(['message' => "The trade is open successfully"]);
+            return response()->json([
+                'message' => "The trade is open successfully",
+                'trade' => $openTrade,
+            ]);
 
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
