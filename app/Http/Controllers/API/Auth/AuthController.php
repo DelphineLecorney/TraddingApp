@@ -26,13 +26,10 @@ class AuthController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
-        $credentials = $request->only('email', 'password');
-        $token = Auth::attempt($credentials);
 
-        if(!$token) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 401);
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['message' => 'Unauthorized'],401);
         }
 
         $user = Auth::user();
@@ -69,9 +66,9 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        $token = $user->createToken('api_token')->plainTextToken;
-          
-        Log::info('User signup successful: ' . json_encode($user));
+        $token = JWTAuth::fromUser($user);
+
+        // Log::info('User signup successful: ' . json_encode($user));
 
         return response()->json([
             'message' => 'User created successfully',
@@ -82,17 +79,15 @@ class AuthController extends Controller
     }
 
     public function refresh()
-{
-    $token = Auth::user()->createToken('api_token')->plainTextToken;
-    
-    return response()->json([
-        'user' => Auth::user(),
-        'authorization' => [
-            'token' => $token,
-            'type' => 'bearer',
-        ]
-    ]);
-}
+    {
+        $token = JWTAuth::refresh();
 
-
+        return response()->json([
+            'user' => Auth::user(),
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);
+    }
 }
