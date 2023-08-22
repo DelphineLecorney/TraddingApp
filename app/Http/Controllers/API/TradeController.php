@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TradeController extends Controller
 {
+    public  function __construct() {
+        $this->middleware('auth:api');
+    }
+
     public function fetchPriceFromApi($symbol)
     {
         $response = Http::withHeaders([
@@ -81,9 +85,15 @@ class TradeController extends Controller
         }
     }
 
+
     public function indexOpenTrades()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
         $openTrades = Trade::where('profile_id', $user->profile->id)
                             ->where('open', true)
                             ->get();
@@ -92,6 +102,8 @@ class TradeController extends Controller
             'open_trades' => $openTrades,
         ]);
     }
+
+
     public function closeTrade(Request $request)
     {
         try {
@@ -186,17 +198,17 @@ class TradeController extends Controller
      * Display the specified resource.
      */
     public function show($id)
-{
-    try {
-        $trade = Trade::findOrFail($id);
+    {
+        try {
+            $trade = Trade::findOrFail($id);
 
-        return response()->json(['trade' => $trade], 200, [], JSON_PRETTY_PRINT);
-    } catch (ModelNotFoundException $e) {
-        return response()->json(['message' => 'Trade not found'], 404);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'An error occurred'], 500);
+            return response()->json(['trade' => $trade], 200, [], JSON_PRETTY_PRINT);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Trade not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred'], 500);
+        }
     }
-}
 
 
     /**

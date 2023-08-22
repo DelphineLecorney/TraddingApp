@@ -69,29 +69,7 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('api_token')->plainTextToken;
-
-        $openTrade = Trade::create([
-            'profile_id' => $profile->id,
-            'symbol' => 'TSLA',
-            'quantity' => 123,
-            'open_price' => 103059,
-            'close_price' => null,
-            'open_datetime' => now(),
-            'close_datetime' => null,
-            'open' => true,
-        ]);
-
-        $closeTrade = Trade::create([
-            'profile_id' => $profile->id,
-            'symbol' => 'TSLA',
-            'quantity' => 123,
-            'open_price' => 103059,
-            'close_price' => 119449,
-            'open_datetime' => $openTrade->open_datetime,
-            'close_datetime' => now()->addMonth(1),
-            'open' => false,
-        ]);
-            
+          
 
         return response()->json([
             'message' => 'User created successfully',

@@ -9,6 +9,10 @@ use App\Models\Profile;
 
 class ProfileController extends Controller
 {
+    public  function __construct() {
+        $this->middleware('auth:api');
+    }
+    
     /**
      * Show the form for creating a new resource.
      */
