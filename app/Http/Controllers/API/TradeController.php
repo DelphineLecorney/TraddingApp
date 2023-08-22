@@ -185,10 +185,19 @@ class TradeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
+    public function show($id)
+{
+    try {
+        $trade = Trade::findOrFail($id);
 
+        return response()->json(['trade' => $trade], 200, [], JSON_PRETTY_PRINT);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['message' => 'Trade not found'], 404);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred'], 500);
     }
+}
+
 
     /**
      * Show the form for editing the specified resource.

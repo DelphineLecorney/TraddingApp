@@ -37,6 +37,7 @@ Route::prefix('users')->group(function () {
 
 Route::prefix('trades')->group(function () {
     Route::get('/', [TradeController::class, 'index']);
+    Route::get('/{id}', [TradeController::class, 'show']);
     Route::post('/openTrade', [TradeController::class, 'openTrade']);
     Route::post('/closeTrade/{id}', [TradeController::class, 'closeTrade']);
     Route::get('/index/open', [TradeController::class, 'indexOpenTrades']);
