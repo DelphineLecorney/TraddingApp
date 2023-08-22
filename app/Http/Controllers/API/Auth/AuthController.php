@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\Trade;
@@ -70,6 +71,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('api_token')->plainTextToken;
           
+        Log::info('User signup successful: ' . json_encode($user));
 
         return response()->json([
             'message' => 'User created successfully',

@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\TradeController;
@@ -22,7 +21,7 @@ use App\Http\Controllers\API\ProfileController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware('auth:api')->get('/trades/fetchPriceFromApi', [TradeController::class, 'fetchPriceFromApi']);
+// Route::middleware('auth:api')->get('/trades/fetchPriceFromApi', [TradeController::class, 'fetchPriceFromApi']);
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
