@@ -66,9 +66,9 @@ class WireController extends Controller
     private function updateProfileBalance(Profile $profile, $amount, $withdrawal)
     {
         if ($withdrawal) {
-            $profile->balance -= $amount;
+            $profile->amount -= $amount;
         } else {
-            $profile->balance += $amount;
+            $profile->amount += $amount;
         }
 
         $profile->save();

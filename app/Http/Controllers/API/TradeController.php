@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TradeController extends Controller
 {
-    public  function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:api');
     }
 
@@ -44,14 +45,14 @@ class TradeController extends Controller
             $symbol = $request->input('symbol');
 
             $currentPriceFloat = $this->fetchPriceFromApi($symbol);
-            var_dump($currentPriceFloat); // Debug 
+            var_dump($currentPriceFloat); // Debug
 
             if (is_null($currentPriceFloat)) {
                 return response()->json(['message' => 'Current price not available'], 400);
             }
 
             $currentPrice = intval($currentPriceFloat * 100);
-            var_dump($currentPrice); // Debug 
+            var_dump($currentPrice); // Debug
 
             $totalCost = $currentPrice * $request->input('quantity');
 
@@ -59,14 +60,15 @@ class TradeController extends Controller
             if (!$user) {
                 return response()->json(['message' => 'User not authenticated'], 401);
             }
-            
+
             $profile = $user->profile;
-            $amount = $profile->wires()->sum('amount');
-            var_dump($amount); // Debug
+            $amount = (int) $profile->wires()->sum('amount');
+            echo 'amount : ', var_dump($amount); // Debug
+
             if ($amount < $totalCost) {
                 return response()->json(['message' => 'Not enough money for buying'], 400);
             }
-            var_dump($totalCost); // Debug
+            echo 'totalcost : ', var_dump($totalCost); // Debug
 
             $openTrade = Trade::create([
                 'profile_id' => $profile->id,
@@ -78,6 +80,8 @@ class TradeController extends Controller
                 'open' => true,
             ]);
 
+            $this->updateProfileBalance($profile, $totalCost, false);
+
             $user->amount -= $totalCost;
             $user->save();
 
@@ -86,7 +90,6 @@ class TradeController extends Controller
                 'trade' => $openTrade,
             ]);
 
-        $this->updateProfileBalance($profile, $totalCost, false);
 
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -143,7 +146,7 @@ class TradeController extends Controller
             ]);
 
             $user = Auth::user();
-            $user->balance += $res;
+            $user->amount += $res;
             $user->save();
 
             return response()->json([
