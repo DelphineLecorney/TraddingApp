@@ -133,7 +133,7 @@ class TradeController extends Controller
                 'symbol' => $trade->symbol,
                 'quantity' => $trade->quantity,
                 'open_price' => $trade->open_price,
-                'close_price' => 119449,
+                'close_price' => intval(119449 * 100),
                 'open_datetime' => $trade->open_datetime,
                 'close_datetime' => now()->addMonth(1),
                 'open' => false,
