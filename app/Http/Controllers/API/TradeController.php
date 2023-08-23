@@ -26,7 +26,7 @@ class TradeController extends Controller
         ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols={$symbol}");
 
         $data = $response->json();
-        var_dump($data);
+
         if (isset($data['quoteResponse']['result'][0]['regularMarketPrice'])) {
             return $data['quoteResponse']['result'][0]['regularMarketPrice'];
         }
@@ -43,13 +43,18 @@ class TradeController extends Controller
 
             $symbol = $request->input('symbol');
 
-            $currentPrice = $this->fetchPriceFromApi($symbol);
+            $currentPriceFloat = $this->fetchPriceFromApi($symbol);
+            var_dump($currentPriceFloat); // Debug for error occurred
 
-            if ($currentPrice === null) {
+            if (is_null($currentPriceFloat)) {
                 return response()->json(['message' => 'Current price not available'], 400);
             }
 
+            $currentPrice = intval($currentPriceFloat * 100);
+            var_dump($currentPrice); // Debug for error occurred
+
             $totalCost = $currentPrice * $request->input('quantity');
+            var_dump($totalCost); // Debug for error occurred
 
             $user = Auth::user();
             if (!$user) {
@@ -118,8 +123,6 @@ class TradeController extends Controller
             ->firstOrFail();
 
             $currentPrice = $this->fetchPriceFromApi($trade->symbol);
-            \Log::info('Current price: ' . $currentPrice);
-
 
             $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
