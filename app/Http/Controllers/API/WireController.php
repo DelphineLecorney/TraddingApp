@@ -47,8 +47,6 @@ class WireController extends Controller
             return response()->json(['message' => 'Profile not found'], 404);
         }
 
-        $this->updateProfileBalance($profile, $amount, $withdrawal);
-
         $wire = Wire::create([
             'profile_id' => $profileId,
             'amount' => $amount,
@@ -62,18 +60,6 @@ class WireController extends Controller
             'wire' => $wire,
         ], 201);
     }
-
-    private function updateProfileBalance(Profile $profile, $amount, $withdrawal)
-    {
-        if ($withdrawal) {
-            $profile->amount -= $amount;
-        } else {
-            $profile->amount += $amount;
-        }
-
-        $profile->save();
-    }
-
 
 
     /**

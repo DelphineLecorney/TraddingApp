@@ -80,8 +80,6 @@ class TradeController extends Controller
                 'open' => true,
             ]);
 
-            $this->updateProfileBalance($profile, $totalCost, false);
-
             $user->amount -= $totalCost;
             $user->save();
 
