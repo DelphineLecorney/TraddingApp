@@ -31,7 +31,6 @@ class WireController extends Controller
      */
     public function createWire(Request $request)
     {
-
         $request->validate([
             'profile_id' => 'required|integer',
             'amount' => 'required|integer',
@@ -39,20 +38,42 @@ class WireController extends Controller
         ]);
 
         $profileId = $request->profile_id;
+        $amount = $request->amount;
+        $withdrawal = $request->withdrawal;
+
+        $profile = Profile::find($profileId);
+
+        if (!$profile) {
+            return response()->json(['message' => 'Profile not found'], 404);
+        }
+
+        $this->updateProfileBalance($profile, $amount, $withdrawal);
 
         $wire = Wire::create([
             'profile_id' => $profileId,
-            'amount' => $request->amount,
-            'withdrawal' => $request->withdrawal,
+            'amount' => $amount,
+            'withdrawal' => $withdrawal,
         ]);
 
-        $message = $request->withdrawal ? 'Your withdrawal is processed successfully' : 'Your deposit is processed successfully';
+        $message = $withdrawal ? 'Your withdrawal is processed successfully' : 'Your deposit is processed successfully';
 
         return response()->json([
             'message' => 'Your wire is created successfully',
             'wire' => $wire,
         ], 201);
     }
+
+    private function updateProfileBalance(Profile $profile, $amount, $withdrawal)
+    {
+        if ($withdrawal) {
+            $profile->balance -= $amount;
+        } else {
+            $profile->balance += $amount;
+        }
+
+        $profile->save();
+    }
+
 
 
     /**

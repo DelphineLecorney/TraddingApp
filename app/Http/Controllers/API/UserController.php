@@ -25,7 +25,7 @@ class UserController extends Controller
 
             return response()->json($response, 200, [], JSON_PRETTY_PRINT);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Trade not found'], 404);
+            return response()->json(['message' => 'User not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred'], 500);
         }
