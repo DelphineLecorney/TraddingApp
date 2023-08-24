@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('first_name');
             $table->text('last_name');
             $table->text('address');
+            $table->decimal('balance', 10, 2)->default(0);
             $table->timestamps();   
         });
     }
