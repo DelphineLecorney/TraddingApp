@@ -23,6 +23,7 @@ class ProfileController extends Controller
             'first_name'=> 'required|string',
             'last_name' => 'required|string',
             'address' => 'required|string',
+            'balance' => 'required|float',
         ]);
 
         $profile = Profile::create([
@@ -30,6 +31,7 @@ class ProfileController extends Controller
            'first_name' => $request->first_name,
            'last_name' => $request->last_name,
            'address' => $request->address,
+           'balance' => $request->balance,
         ]);
 
         return response()->json([
@@ -111,6 +113,7 @@ class ProfileController extends Controller
                 'first_name'=> 'required|string',
                 'last_name' => 'required|string',
                 'address' => 'required|string',
+                'balance' => 'required|float',
             ]);
 
             $profile->update($updatedData);
@@ -134,10 +137,8 @@ class ProfileController extends Controller
         try {
             $user = auth()->user();
 
-            dd(Auth::user());
 
             $profile = $user->profile;
-            dd($profile);
             if (!$profile) {
                 return response()->json([
                     'status' => 404,
@@ -151,7 +152,7 @@ class ProfileController extends Controller
                 'message' => 'Profile retrieved successfully',
                 'data' => [
                     'profile' => $profile,
-                    'balance' => $user->balance,
+                    'balance' => $profile->balance,
                 ]
             ], 200, [], JSON_PRETTY_PRINT);
         } catch (\Exception $e) {

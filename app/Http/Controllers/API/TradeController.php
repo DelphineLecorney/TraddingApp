@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\Auth\AuthController;
@@ -62,10 +61,15 @@ class TradeController extends Controller
             }
 
             $profile = $user->profile;
-            $amount = (int) $profile->wires()->sum('amount');
-            echo 'amount : ', var_dump($amount); // Debug
 
-            if ($amount < $totalCost) {
+            $profileController = new ProfileController();
+            $profileResponse = $profileController->fetchProfileWithBalance();
+            $profileData = json_decode($profileResponse->getcontent(), true);
+            
+            $balance = $profileData;
+            echo 'balance : ', var_dump($balance); // Debug
+
+            if ($balance < $totalCost) {
                 return response()->json(['message' => 'Not enough money for buying'], 400);
             }
             echo 'totalcost : ', var_dump($totalCost); // Debug
@@ -80,7 +84,7 @@ class TradeController extends Controller
                 'open' => true,
             ]);
 
-            $user->amount -= $totalCost;
+            $user->balance -= $totalCost;
             $user->save();
 
             return response()->json([
@@ -92,8 +96,10 @@ class TradeController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         } catch (\Exception $e) {
+            \Log::error('An error occurred: ' . $e->getMessage());
             return response()->json(['message' => 'An error occurred'], 500);
         }
+        
     }
 
 
@@ -137,14 +143,14 @@ class TradeController extends Controller
                 'symbol' => $trade->symbol,
                 'quantity' => $trade->quantity,
                 'open_price' => $trade->open_price,
-                'close_price' => intval(119449 * 100),
+                'close_price' => $trade->close_price,
                 'open_datetime' => $trade->open_datetime,
                 'close_datetime' => now()->addMonth(1),
                 'open' => false,
             ]);
 
             $user = Auth::user();
-            $user->amount += $res;
+            $user->balance += $res;
             $user->save();
 
             return response()->json([

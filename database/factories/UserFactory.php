@@ -38,7 +38,7 @@ class UserFactory extends Factory
         $profile->trades()->create([
             'symbol' => 'TSLA',
             'quantity' => 123,
-            'open_price' => 103059,
+            'open_price' => 21000,
             'close_price' => null,
             'open_datetime' => now(),
             'close_datetime' => null,
@@ -47,8 +47,8 @@ class UserFactory extends Factory
         $profile->trades()->create([
             'symbol' => 'TSLA',
             'quantity' => 123,
-            'open_price' => 103059,
-            'close_price' => 119449,
+            'open_price' => 21000,
+            'close_price' => 24000,
             'open_datetime' => now(),
             'close_datetime' => now()->addHours(2),
             'open' => false,
