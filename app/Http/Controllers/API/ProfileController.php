@@ -137,7 +137,6 @@ class ProfileController extends Controller
         try {
             $user = auth()->user();
 
-
             $profile = $user->profile;
             if (!$profile) {
                 return response()->json([

@@ -59,15 +59,10 @@ class TradeController extends Controller
             if (!$user) {
                 return response()->json(['message' => 'User not authenticated'], 401);
             }
+     
+            $profileData = $this->fetchProfileWithBalance($profile->balance);
 
-            $profile = $user->profile;
-
-            $profileController = new ProfileController();
-            $profileResponse = $profileController->fetchProfileWithBalance();
-            $profileData = json_decode($profileResponse->getcontent(), true);
-            
-            $balance = $profileData;
-            echo 'balance : ', var_dump($balance); // Debug
+            echo 'balance : ', var_dump($profileData); // Debug
 
             if ($balance < $totalCost) {
                 return response()->json(['message' => 'Not enough money for buying'], 400);
