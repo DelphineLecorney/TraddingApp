@@ -85,6 +85,7 @@ class TradeController extends Controller
                 'open' => true,
             ]);
 
+            $tradeId = $openTrade->id;
             $user = Auth::user();
             $profile = $user->profile;
             $profile->balance -= $totalCost;
@@ -93,6 +94,7 @@ class TradeController extends Controller
             return response()->json([
                 'message' => "The trade is open successfully",
                 'trade' => $openTrade,
+                'trade_id' => $tradeId,
             ]);
 
 
@@ -124,50 +126,50 @@ class TradeController extends Controller
     }
 
 
-    public function closeTrade(Request $request)
-    {
-        try {
-            $request->validate([
-                'profile_id' => 'required|exists:profiles,id',
-            ]);
+    public function closeTrade($id)
+{
+    try {
+        $trade = Trade::findOrFail($id);
 
-            $trade = Trade::where('profile_id', $request->input('profile_id'))
-            ->where('open', true)
-            ->firstOrFail();
-
-            $currentPrice = $this->fetchPriceFromApi($trade->symbol);
-
-            $res = ($currentPrice - $trade->open_price) * $trade->quantity;
-
-            $profile = Auth::user()->profile;
-
-            $closeTrade = Trade::create([
-                'profile_id' => $trade->profile_id,
-                'symbol' => $trade->symbol,
-                'quantity' => $trade->quantity,
-                'open_price' => $trade->open_price,
-                'close_price' => $trade->close_price,
-                'open_datetime' => $trade->open_datetime,
-                'close_datetime' => now()->addMonth(1),
-                'open' => false,
-            ]);
-
-            $user = Auth::user();
-            $user->balance += $res;
-            $user->save();
-
-            return response()->json([
-                'message' => 'Trade closed successfully',
-                'result' => $res,
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Trade not found'], 404);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred'], 500);
+        if ($trade->open === false) {
+            return response()->json(['message' => 'Trade is already closed'], 400);
         }
+
+        $currentPrice = $this->fetchPriceFromApi($trade->symbol);
+
+        if ($currentPrice < $trade->open_price) {
+            return response()->json(['message' => 'Cannot sell below opening price'], 400);
+        }
+
+        $res = ($currentPrice - $trade->open_price) * $trade->quantity;
+
+        $profile = Auth::user()->profile;
+
+        $closeTrade = Trade::create([
+            'profile_id' => $trade->profile_id,
+            'symbol' => $trade->symbol,
+            'quantity' => $trade->quantity,
+            'open_price' => $trade->open_price,
+            'close_price' => $currentPrice,
+            'open_datetime' => $trade->open_datetime,
+            'close_datetime' => now()->addMonth(1),
+            'open' => false,
+        ]);
+
+        $profile->balance += $res;
+        $profile->save();
+
+        return response()->json([
+            'message' => 'Trade closed successfully',
+            'result' => $res,
+        ]);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['message' => 'Trade not found'], 404);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred'], 500);
     }
+}
+
 
 
     public function indexCloseTrades()
