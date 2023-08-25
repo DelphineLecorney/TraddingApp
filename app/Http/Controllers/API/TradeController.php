@@ -205,38 +205,61 @@ class TradeController extends Controller
     }
 
     /**
-     * Show the total open PNL (all open trades)
+     * Show the total open PNL (all open trades for an user)
      */
     public function getOpenPNL()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
-
-        $openTrades = Trade::where('profile_id', $user->profile->id)
-                           ->where('open', true)
-                           ->get();
-
-        $openTradeIds = $openTrades->pluck('id');
-
-        $totalPNL = 0;
-
-        foreach ($openTrades as $trade) {
-            $pnl = ($trade->close_price - $trade->open_price) * $trade->quantity;
-            $totalPNL += $pnl;
-        }
-
-        Log::info('open_price : ' . $trade->open_price . ' close_price : ' . $trade->close_price);
-        Log::info('total : ' . $totalPNL);
-
-
-        return response()->json([
-            'open_trade_ids' => $openTradesIds,
-            'total_open_pnl' => $totalPNL,
-        ]);
+    if (!$user) {
+        return response()->json(['message' => 'User not authenticated'], 401);
     }
+
+    $openTrades = Trade::where('profile_id', $user->profile->id)
+                       ->where('open', true)
+                       ->get();
+
+    $totalPNL = 0;
+
+    foreach ($openTrades as $trade) {
+        $pnl = ($trade->close_price - $trade->open_price) * $trade->quantity;
+        $totalPNL += $pnl;
+    }
+
+    Log::info('open_price : ' . $trade->open_price . ' close_price : ' . $trade->close_price);
+    Log::info('total : ' . $totalPNL);
+
+    return response()->json([
+        'open_trade_ids' => $openTrades->pluck('id'),
+        'total_open_pnl' => $totalPNL,
+    ]);
+}
+
+
+    public function getClosedPNL()
+{
+    $user = Auth::user();
+
+    if (!$user) {
+        return response()->json(['message' => 'User not authenticated'], 401);
+    }
+
+    $closedTrades = Trade::where('profile_id', $user->profile->id)
+                         ->where('open', false)
+                         ->get();
+
+    $totalPNL = 0;
+
+    foreach ($closedTrades as $trade) {
+        $pnl = ($trade->close_price - $trade->open_price) * $trade->quantity;
+        $totalPNL += $pnl;
+    }
+
+    return response()->json([
+        'closed_trades' => $closedTrades,
+        'total_closed_pnl' => $totalPNL,
+    ]);
+}
 
 
 

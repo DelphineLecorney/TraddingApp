@@ -41,6 +41,7 @@ Route::prefix('trades')->group(function () {
     Route::get('/index/open', [TradeController::class, 'indexOpenTrades']);
     Route::get('/index/closed', [TradeController::class, 'indexCloseTrades']);
     Route::get('/openPNL', [TradeController::class, 'getOpenPNL']);
+    Route::get('/closedPNL', [TradeController::class, 'getClosedPNL']);
 });
 
 Route::prefix('wires')->group(function() {
