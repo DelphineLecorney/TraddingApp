@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\Auth\AuthController;
+use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -59,8 +60,13 @@ class TradeController extends Controller
             if (!$user) {
                 return response()->json(['message' => 'User not authenticated'], 401);
             }
-     
-            $profileData = $this->fetchProfileWithBalance($profile->balance);
+
+            $profileController = new ProfileController();
+            $response = $profileController->fetchProfileWithBalance($user->profile->balance);
+            $profileData = $response->getData();
+
+            $balance = $profileData->data->balance;
+
 
             echo 'balance : ', var_dump($profileData); // Debug
 
@@ -70,17 +76,19 @@ class TradeController extends Controller
             echo 'totalcost : ', var_dump($totalCost); // Debug
 
             $openTrade = Trade::create([
-                'profile_id' => $profile->id,
+                'profile_id' => $user->profile->id,
                 'symbol' => $request->symbol,
                 'quantity' => $request->quantity,
-                'open_price' => null,
+                'open_price' => $currentPrice,
                 'open_datetime' => now(),
                 'close_datetime' => null,
                 'open' => true,
             ]);
 
-            $user->balance -= $totalCost;
-            $user->save();
+            $user = Auth::user();
+            $profile = $user->profile;
+            $profile->balance -= $totalCost;
+            $profile->save();
 
             return response()->json([
                 'message' => "The trade is open successfully",
