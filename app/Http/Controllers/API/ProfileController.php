@@ -113,7 +113,6 @@ class ProfileController extends Controller
                 'first_name'=> 'required|string',
                 'last_name' => 'required|string',
                 'address' => 'required|string',
-                'balance' => 'required|float',
             ]);
 
             $profile->update($updatedData);

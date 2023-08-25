@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\Auth\AuthController;
@@ -11,6 +12,7 @@ use App\Models\Trade;
 use App\Models\Profile;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class TradeController extends Controller
 {
@@ -19,6 +21,9 @@ class TradeController extends Controller
         $this->middleware('auth:api');
     }
 
+    /**
+     * Function for retrieving the share price from an API
+     */
     public function fetchPriceFromApi($symbol)
     {
         $response = Http::withHeaders([
@@ -34,6 +39,9 @@ class TradeController extends Controller
         return 0;
     }
 
+    /**
+     * Function for open a trade
+     */
     public function openTrade(Request $request)
     {
         try {
@@ -104,10 +112,12 @@ class TradeController extends Controller
             \Log::error('An error occurred: ' . $e->getMessage());
             return response()->json(['message' => 'An error occurred'], 500);
         }
-        
+
     }
 
-
+    /**
+    * Show the opened trades
+    */
     public function indexOpenTrades()
     {
         $user = Auth::user();
@@ -125,7 +135,9 @@ class TradeController extends Controller
         ]);
     }
 
-
+    /**
+     * Function for close a trade
+     */
     public function closeTrade($id)
 {
     try {
@@ -137,21 +149,17 @@ class TradeController extends Controller
 
         $currentPrice = $this->fetchPriceFromApi($trade->symbol);
 
-        if ($currentPrice < $trade->open_price) {
+        if (intval($currentPrice * 100) < $trade->open_price) {
             return response()->json(['message' => 'Cannot sell below opening price'], 400);
         }
 
+        $currentPrice = intval($currentPrice * 100);
         $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
         $profile = Auth::user()->profile;
 
-        $closeTrade = Trade::create([
-            'profile_id' => $trade->profile_id,
-            'symbol' => $trade->symbol,
-            'quantity' => $trade->quantity,
-            'open_price' => $trade->open_price,
+        $trade->update([
             'close_price' => $currentPrice,
-            'open_datetime' => $trade->open_datetime,
             'close_datetime' => now()->addMonth(1),
             'open' => false,
         ]);
@@ -172,6 +180,9 @@ class TradeController extends Controller
 
 
 
+    /**
+    * Show the closed trades
+    */
     public function indexCloseTrades()
     {
         $user = Auth::user();
@@ -185,12 +196,40 @@ class TradeController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the total open PNL (all open trades)
      */
-    public function create()
+    public function getOpenPNL()
     {
-        //
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $openTrades = Trade::where('profile_id', $user->profile->id)
+                           ->where('open', true)
+                           ->get();
+
+        $openTradeIds = $openTrades->pluck('id');
+
+        $totalPNL = 0;
+
+        foreach ($openTrades as $trade) {
+            $pnl = ($trade->close_price - $trade->open_price) * $trade->quantity;
+            $totalPNL += $pnl;
+        }
+
+        Log::info('open_price : ' . $trade->open_price . ' close_price : ' . $trade->close_price);
+        Log::info('total : ' . $totalPNL);
+
+
+        return response()->json([
+            'open_trade_ids' => $openTradesIds,
+            'total_open_pnl' => $totalPNL,
+        ]);
     }
+
+
 
     public function index()
     {
@@ -246,6 +285,7 @@ class TradeController extends Controller
     {
         //
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -40,6 +40,7 @@ Route::prefix('trades')->group(function () {
     Route::post('/closeTrade/{id}', [TradeController::class, 'closeTrade']);
     Route::get('/index/open', [TradeController::class, 'indexOpenTrades']);
     Route::get('/index/closed', [TradeController::class, 'indexCloseTrades']);
+    Route::get('/openPNL', [TradeController::class, 'getOpenPNL']);
 });
 
 Route::prefix('wires')->group(function() {
@@ -51,5 +52,5 @@ Route::prefix('wires')->group(function() {
 Route::prefix('profiles')->group(function() {
     Route::get('/', [ProfileController::class, 'index']);
     Route::get('/{id}', [ProfileController::class, 'show']);
-    Route::put('/{id}', [ProfileController::class, 'update']);
+    Route::put('/{id}', [ProfileController::class, 'update'])->middleware('auth:api');
 });
