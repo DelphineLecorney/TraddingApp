@@ -70,7 +70,7 @@ class TradeController extends Controller
             }
 
             $profileController = new ProfileController();
-            $response = $profileController->fetchProfileWithBalance($user->profile->balance);
+            $response = $profileController->fetchProfileWithBalance();
             $profileData = $response->getData();
 
             $balance = $profileData->data->balance;
@@ -143,17 +143,21 @@ class TradeController extends Controller
     try {
         $trade = Trade::findOrFail($id);
 
+        Log::info('Before update - Trade ID: ' . $id . ' - Trade open status: ' . $trade->open);
+        Log::info('Trade ID: ' . $id);
+        Log::info('Trade open status: ' . $trade->open);
+
         if ($trade->open === false) {
             return response()->json(['message' => 'Trade is already closed'], 400);
         }
 
         $currentPrice = $this->fetchPriceFromApi($trade->symbol);
+        $currentPrice = intval($currentPrice * 100);
 
-        if (intval($currentPrice * 100) < $trade->open_price) {
+        if ($currentPrice < $trade->open_price) {
             return response()->json(['message' => 'Cannot sell below opening price'], 400);
         }
 
-        $currentPrice = intval($currentPrice * 100);
         $res = ($currentPrice - $trade->open_price) * $trade->quantity;
 
         $profile = Auth::user()->profile;
@@ -167,6 +171,10 @@ class TradeController extends Controller
         $profile->balance += $res;
         $profile->save();
 
+        $trade->refresh();
+
+        Log::info('After update - Trade ID: ' . $id . ' - Trade open status: ' . $trade->open);
+
         return response()->json([
             'message' => 'Trade closed successfully',
             'result' => $res,
@@ -177,6 +185,7 @@ class TradeController extends Controller
         return response()->json(['message' => 'An error occurred'], 500);
     }
 }
+
 
 
 
