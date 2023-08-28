@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\API\Auth\AuthController;
+use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\TradeController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\WireController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\Auth\AuthController;
-use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\API\TradeController;
-use App\Http\Controllers\API\WireController;
-use App\Http\Controllers\API\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,14 +44,14 @@ Route::prefix('trades')->group(function () {
     Route::get('/closedPNL', [TradeController::class, 'getClosedPNL']);
 });
 
-Route::prefix('wires')->group(function() {
+Route::prefix('wires')->group(function () {
     Route::get('/', [WireController::class, 'index']);
     Route::get('/{id}', [WireController::class, 'show']);
     Route::post('createWire', [WireController::class, 'createWire']);
 });
 
-Route::prefix('profiles')->group(function() {
+Route::prefix('profiles')->group(function () {
     Route::get('/', [ProfileController::class, 'index']);
     Route::get('/{id}', [ProfileController::class, 'show']);
-    Route::put('/{id}', [ProfileController::class, 'update'])->middleware('auth:api');
+    Route::put('/{id}', [ProfileController::class, 'update']);
 });

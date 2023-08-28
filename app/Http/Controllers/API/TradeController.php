@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\Auth\AuthController;
-use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\Controller;
+use App\Models\Trade;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Request;
-use App\Models\Trade;
-use App\Models\Profile;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class TradeController extends Controller
 {
@@ -22,13 +19,13 @@ class TradeController extends Controller
     }
 
     /**
-     * Function for retrieving the share price from an API
+     * Function for retrieving the share price from an API.
      */
     public function fetchPriceFromApi($symbol)
     {
         $response = Http::withHeaders([
             'X-Rapidapi-Key' => '0a5012542cmsha2cbc9ec2f5dc58p10173cjsn113632b4ef8d',
-            'X-Rapidapi-Host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+            'X-Rapidapi-Host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com',
         ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols={$symbol}");
 
         $data = $response->json();
@@ -36,11 +33,12 @@ class TradeController extends Controller
         if (isset($data['quoteResponse']['result'][0]['regularMarketPrice'])) {
             return $data['quoteResponse']['result'][0]['regularMarketPrice'];
         }
+
         return 0;
     }
 
     /**
-     * Function for open a trade
+     * Function for open a trade.
      */
     public function openTrade(Request $request)
     {
@@ -75,7 +73,6 @@ class TradeController extends Controller
 
             $balance = $profileData->data->balance;
 
-
             echo 'balance : ', var_dump($profileData); // Debug
 
             if ($balance < $totalCost) {
@@ -100,24 +97,22 @@ class TradeController extends Controller
             $profile->save();
 
             return response()->json([
-                'message' => "The trade is open successfully",
+                'message' => 'The trade is open successfully',
                 'trade' => $openTrade,
                 'trade_id' => $tradeId,
             ]);
-
-
         } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         } catch (\Exception $e) {
-            \Log::error('An error occurred: ' . $e->getMessage());
+            \Log::error('An error occurred: '.$e->getMessage());
+
             return response()->json(['message' => 'An error occurred'], 500);
         }
-
     }
 
     /**
-    * Show the opened trades
-    */
+     * Show the opened trades.
+     */
     public function indexOpenTrades()
     {
         $user = Auth::user();
@@ -136,16 +131,16 @@ class TradeController extends Controller
     }
 
     /**
-     * Function for close a trade
+     * Function for close a trade.
      */
     public function closeTrade($id)
     {
         try {
             $trade = Trade::findOrFail($id);
 
-            Log::info('Before update - Trade ID: ' . $id . ' - Trade open status: ' . $trade->open);
-            Log::info('Trade ID: ' . $id);
-            Log::info('Trade open status: ' . $trade->open);
+            Log::info('Before update - Trade ID: '.$id.' - Trade open status: '.$trade->open);
+            Log::info('Trade ID: '.$id);
+            Log::info('Trade open status: '.$trade->open);
 
             if ($trade->open === false) {
                 return response()->json(['message' => 'Trade is already closed'], 400);
@@ -173,7 +168,7 @@ class TradeController extends Controller
 
             $trade->refresh();
 
-            Log::info('After update - Trade ID: ' . $id . ' - Trade open status: ' . $trade->open);
+            Log::info('After update - Trade ID: '.$id.' - Trade open status: '.$trade->open);
 
             return response()->json([
                 'message' => 'Trade closed successfully',
@@ -186,26 +181,24 @@ class TradeController extends Controller
         }
     }
 
-
-
-
     /**
-    * Show the closed trades
-    */
-    public function indexCloseTrades()
+     * Show the closed trades.
+     */
+    public function indexCloseTrades(Request $request)
     {
         $user = Auth::user();
+
         $closedTrades = Trade::where('profile_id', $user->profile->id)
                               ->where('open', false)
                               ->get();
 
         return response()->json([
             'closed_trades' => $closedTrades,
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
-     * Show the total open PNL (all open trades for an user)
+     * Show the total open PNL (all open trades for an user).
      */
     public function getOpenPNL()
     {
@@ -227,21 +220,21 @@ class TradeController extends Controller
                 $totalPNL += $pnl;
             }
 
-            Log::info('open_price 1 : ' . $trade->open_price . ' close_price 1: ' . $trade->close_price);
-            Log::info('total 1: ' . $totalPNL);
+            Log::info('open_price 1 : '.$trade->open_price.' close_price 1: '.$trade->close_price);
+            Log::info('total 1: '.$totalPNL);
 
             return response()->json([
                 'open_trade_ids' => $openTrades->pluck('id'),
                 'total_open_pnl' => $totalPNL,
             ]);
         } catch (\Exception $e) {
-            Log::error('An error occurred in getOpenPNL: ' . $e->getMessage());
+            Log::error('An error occurred in getOpenPNL: '.$e->getMessage());
+
             return response()->json(['message' => 'An error occurred'], 500);
         }
     }
 
-
-    public function getClosedPNL()
+    public function getClosedPNL(Request $request)
     {
         try {
             $user = Auth::user();
@@ -265,22 +258,19 @@ class TradeController extends Controller
                 $totalPNL += $pnl;
             }
 
-            Log::info('open_price 1 : ' . $closedTrade->open_price . ' close_price 1: ' . $closedTrade->close_price);
-            Log::info('total 1: ' . $totalPNL);
+            Log::info('open_price 1 : '.$closedTrade->open_price.' close_price 1: '.$closedTrade->close_price);
+            Log::info('total 1: '.$totalPNL);
 
             return response()->json([
                 'closed_trades' => $closedTrades,
                 'total_closed_pnl' => $totalPNL,
             ]);
-
         } catch (\Exception $e) {
-            Log::error('An error occurred in getClosedPNL: ' . $e->getMessage());
+            Log::error('An error occurred in getClosedPNL: '.$e->getMessage());
+
             return response()->json(['message' => 'An error occurred'], 500);
         }
     }
-
-
-
 
     public function index()
     {
@@ -292,7 +282,7 @@ class TradeController extends Controller
         ];
 
         return response()->json([
-            'trades' => $trades
+            'trades' => $trades,
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
@@ -301,7 +291,6 @@ class TradeController extends Controller
      */
     public function store(Request $request)
     {
-        //
     }
 
     /**
@@ -320,13 +309,11 @@ class TradeController extends Controller
         }
     }
 
-
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        //
     }
 
     /**
@@ -334,15 +321,12 @@ class TradeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
     }
 }
