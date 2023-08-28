@@ -138,10 +138,6 @@ class TradeController extends Controller
         try {
             $trade = Trade::findOrFail($id);
 
-            Log::info('Before update - Trade ID: '.$id.' - Trade open status: '.$trade->open);
-            Log::info('Trade ID: '.$id);
-            Log::info('Trade open status: '.$trade->open);
-
             if ($trade->open === false) {
                 return response()->json(['message' => 'Trade is already closed'], 400);
             }
@@ -167,8 +163,6 @@ class TradeController extends Controller
             $profile->save();
 
             $trade->refresh();
-
-            Log::info('After update - Trade ID: '.$id.' - Trade open status: '.$trade->open);
 
             return response()->json([
                 'message' => 'Trade closed successfully',
@@ -236,40 +230,27 @@ class TradeController extends Controller
 
     public function getClosedPNL(Request $request)
     {
-        try {
-            $user = Auth::user();
+        $user = Auth::user();
 
-            $profileId = Auth::user()->profile->id;
+        $closedTrades = Trade::where('profile_id', $user->profile->id)
+                             ->where('open', false)
+                             ->get();
 
-            if (!$user) {
-                return response()->json(['message' => 'User not authenticated'], 401);
-            }
+        dd($closedTrades);
 
-            $trades = Trade::where('profile_id', $profileId)->get();
+        // $totalPNL = 0;
 
-            $closedTrades = Trade::where('profile_id', $user->profile->id)
-                                 ->where('open', false)
-                                 ->get();
+        // foreach ($closedTrades as $closedTrade) {
+        //     $pnl = ($closedTrade->close_price - $closedTrade->open_price) * $closedTrade->quantity;
+        //     $totalPNL += $pnl;
 
-            $totalPNL = 0;
+        //     Log::info('open_price 1 : '.$closedTrade->open_price.' close_price 1: '.$closedTrade->close_price);
+        // }
 
-            foreach ($closedTrades as $closedTrade) {
-                $pnl = ($closedTrade->close_price - $closedTrade->open_price) * $closedTrade->quantity;
-                $totalPNL += $pnl;
-            }
-
-            Log::info('open_price 1 : '.$closedTrade->open_price.' close_price 1: '.$closedTrade->close_price);
-            Log::info('total 1: '.$totalPNL);
-
-            return response()->json([
-                'closed_trades' => $closedTrades,
-                'total_closed_pnl' => $totalPNL,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('An error occurred in getClosedPNL: '.$e->getMessage());
-
-            return response()->json(['message' => 'An error occurred'], 500);
-        }
+        return response()->json([
+            'closed_trades' => $closedTrades,
+            // 'total_closed_pnl' => $totalPNL,
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     public function index()
