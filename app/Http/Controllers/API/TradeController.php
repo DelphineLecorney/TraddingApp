@@ -238,18 +238,18 @@ class TradeController extends Controller
 
         dd($closedTrades);
 
-        // $totalPNL = 0;
+        $totalPNL = 0;
 
-        // foreach ($closedTrades as $closedTrade) {
-        //     $pnl = ($closedTrade->close_price - $closedTrade->open_price) * $closedTrade->quantity;
-        //     $totalPNL += $pnl;
+        foreach ($closedTrades as $closedTrade) {
+            $pnl = ($closedTrade->close_price - $closedTrade->open_price) * $closedTrade->quantity;
+            $totalPNL += $pnl;
 
-        //     Log::info('open_price 1 : '.$closedTrade->open_price.' close_price 1: '.$closedTrade->close_price);
-        // }
+            Log::info('open_price 1 : '.$closedTrade->open_price.' close_price 1: '.$closedTrade->close_price);
+        }
 
         return response()->json([
             'closed_trades' => $closedTrades,
-            // 'total_closed_pnl' => $totalPNL,
+            'total_closed_pnl' => $totalPNL,
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
@@ -265,6 +265,42 @@ class TradeController extends Controller
         return response()->json([
             'trades' => $trades,
         ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Return current balance.
+     */
+    public function getCurrentBalance()
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
+            $profileController = new ProfileController();
+            $response = $profileController->fetchProfileWithBalance();
+            $profileData = $response->getData();
+
+            $totalBalance = $profileData->data->balance;
+
+            $openTrades = Trade::where('profile_id', $user->profile->id)
+                                ->where('open', true)
+                                ->get();
+
+            foreach ($openTrades as $openTrade) {
+                $currentPrice = $this->fetchPriceFromApi($trade->symbol);
+                $currentPrice = intval($currentPrice * 100);
+                $totalBalance -= $currentPrice * $trade->quantity;
+            }
+
+            return $response->json([
+                'currentBalance' => $totalBalance,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occured'], 500);
+        }
     }
 
     /**
