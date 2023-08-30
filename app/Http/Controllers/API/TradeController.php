@@ -24,7 +24,7 @@ class TradeController extends Controller
     public function fetchPriceFromApi($symbol)
     {
         $response = Http::withHeaders([
-            'X-Rapidapi-Key' => '0a5012542cmsha2cbc9ec2f5dc58p10173cjsn113632b4ef8d',
+            'X-Rapidapi-Key' => env('YAHOO_API_KEY'),
             'X-Rapidapi-Host' => 'apidojo-yahoo-finance-v1.p.rapidapi.com',
         ])->get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols={$symbol}");
 
