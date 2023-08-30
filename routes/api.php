@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\TestController;
 use App\Http\Controllers\API\TradeController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\WireController;
@@ -22,8 +23,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/test-debug', [TestController::class, 'testDebugging'])->name('test.debugging');
+
 Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('signup', [AuthController::class, 'signup']);
     Route::post('refresh', [AuthController::class, 'refresh']);
 });
@@ -42,6 +45,7 @@ Route::prefix('trades')->group(function () {
     Route::get('/index/closed', [TradeController::class, 'indexCloseTrades']);
     Route::get('/openPNL', [TradeController::class, 'getOpenPNL']);
     Route::get('/closedPNL', [TradeController::class, 'getClosedPNL']);
+    Route::get('/currentBalance', [TradeController::class, 'getCurrentBalance']);
 });
 
 Route::prefix('wires')->group(function () {

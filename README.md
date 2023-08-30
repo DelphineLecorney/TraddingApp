@@ -1,4 +1,6 @@
 <br>
+Work in Progress
+
 <h1 align="center">⭐️ TraddingApp  ⭐️</h1>
 
 <h2 align="center">Hi, I'm Delphine  👋</h2>  

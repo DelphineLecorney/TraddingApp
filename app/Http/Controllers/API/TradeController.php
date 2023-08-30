@@ -285,9 +285,13 @@ class TradeController extends Controller
 
             $totalBalance = $profileData->data->balance;
 
+            ddd($totalBalance);
+
             $openTrades = Trade::where('profile_id', $user->profile->id)
-                                ->where('open', true)
+                                ->where('open', false)
                                 ->get();
+
+            ddd($openTrades);
 
             foreach ($openTrades as $openTrade) {
                 $currentPrice = $this->fetchPriceFromApi($trade->symbol);
