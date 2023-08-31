@@ -61,9 +61,6 @@ The url of the API will be for example: http://localhost:8000/
 		php artisan db:seed
 	```
 
-
-
-* The API will now be accessible at http://localhost:8000/
 <br><br>
 <h2>JWT Authentication  </h2>
 
