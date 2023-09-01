@@ -1,9 +1,6 @@
 <br>
-Work in Progress
 
 <h1 align="center">⭐️ TraddingApp  ⭐️</h1>
-
-<h2 align="center">Hi, I'm Delphine  👋</h2>  
 
 <h3 align="center">This repository is a php exercise carried out during Becode training   </h3> <br>
 
