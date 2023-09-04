@@ -228,6 +228,9 @@ class TradeController extends Controller
         }
     }
 
+    /**
+     * Show the total closed PNL (all close trades for an user).
+     */
     public function getClosedPNL(Request $request)
     {
         $user = Auth::user();
@@ -253,6 +256,9 @@ class TradeController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
+    /**
+     * Show all the trades.
+     */
     public function index()
     {
         $trades = Trade::all();

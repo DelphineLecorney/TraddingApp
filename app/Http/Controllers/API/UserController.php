@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 
@@ -13,6 +12,9 @@ class UserController extends Controller
         $this->middleware('auth:api');
     }
 
+    /**
+     * Show all users.
+     */
     public function index()
     {
         try {
@@ -31,11 +33,14 @@ class UserController extends Controller
         }
     }
 
-
+    /**
+     * Show a user.
+     */
     public function show(string $id)
     {
         try {
             $user = User::findOrFail($id);
+
             return view('testViews', ['user' => $user]);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Trade not found'], 404);

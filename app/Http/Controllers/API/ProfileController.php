@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\API\Auth\AuthController;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
+use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public  function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:api');
     }
-    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -20,7 +20,7 @@ class ProfileController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:user,id',
-            'first_name'=> 'required|string',
+            'first_name' => 'required|string',
             'last_name' => 'required|string',
             'address' => 'required|string',
             'balance' => 'required|float',
@@ -40,6 +40,9 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Show all profiles.
+     */
     public function index()
     {
         $profiles = Profile::all();
@@ -50,7 +53,7 @@ class ProfileController extends Controller
         ];
 
         return response()->json([
-            'profiles' => $profiles
+            'profiles' => $profiles,
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
@@ -59,7 +62,6 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        //
     }
 
     /**
@@ -73,24 +75,22 @@ class ProfileController extends Controller
             return response()->json([
                 'status' => 404,
                 'message' => 'Profile not found',
-                'data' => null
+                'data' => null,
             ], 404, [], JSON_PRETTY_PRINT);
         }
 
         return response()->json([
             'status' => 200,
             'message' => 'Profile retrieved successfully',
-            'data' => $profile
+            'data' => $profile,
         ], 200, [], JSON_PRETTY_PRINT);
     }
-
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        //
     }
 
     /**
@@ -105,12 +105,12 @@ class ProfileController extends Controller
                 return response()->json([
                     'status' => 404,
                     'message' => 'Profile not found',
-                    'data' => null
+                    'data' => null,
                 ], 404, [], JSON_PRETTY_PRINT);
             }
 
             $updatedData = $request->validate([
-                'first_name'=> 'required|string',
+                'first_name' => 'required|string',
                 'last_name' => 'required|string',
                 'address' => 'required|string',
             ]);
@@ -120,17 +120,20 @@ class ProfileController extends Controller
             return response()->json([
                 'status' => 200,
                 'message' => 'The profile was successfully updated',
-                'data' => $profile
+                'data' => $profile,
             ], 200, [], JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while updating the profile',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500, [], JSON_PRETTY_PRINT);
         }
     }
 
+    /**
+     * Fetch the profile with the balance.
+     */
     public function fetchProfileWithBalance()
     {
         try {
@@ -141,7 +144,7 @@ class ProfileController extends Controller
                 return response()->json([
                     'status' => 404,
                     'message' => 'Profile not found',
-                    'data' => null
+                    'data' => null,
                 ], 404, [], JSON_PRETTY_PRINT);
             }
 
@@ -151,23 +154,21 @@ class ProfileController extends Controller
                 'data' => [
                     'profile' => $profile,
                     'balance' => $profile->balance,
-                ]
+                ],
             ], 200, [], JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while fetching the profile data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500, [], JSON_PRETTY_PRINT);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
     }
 }
